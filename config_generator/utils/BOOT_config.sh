@@ -1,0 +1,113 @@
+#!/bin/bash
+
+
+### BOOT Block
+#       This block takes care of an eventual Guest which requires to run under Linux.
+#       This kind of guests follow the stages of typical Linux boot process so a kernel (in form of bzImage for example) and a ramdisk are needed to spawn the Guest.
+#       Moreover this blocks, as part of the whole block of cofig generation,  takes also care about the problem of exposing a fs from the host to guest, if needed.
+#
+#       NB:
+#       Some RT partitioning Hyperv like Jailhouse or Bao are more concerned with isolation than virtualizationm born to make a 1to1 resource pinning and not emulate resources they dont have.
+#       In that cases the Guest could also be a bare application or running above a thiny os like freeRTOS and this blck will be skipped.
+#
+###
+
+workpath=/usr/share/runPHI/config_generator
+
+conf="$1"
+hyperv="$2"
+crundir="$3"
+containerid="$4"
+
+bundle=$( cat "$crundir"/bundle )
+configfile="$bundle"/config.json
+mountpoint=$( cat "$crundir"/rootfs )
+
+env=`cat $configfile | jq  -c -r '.["process"]["env"] | join("\" \"")'` #environment variable in config.json
+cpio=""
+
+##Check if the container comes with its own Kernel and Ramdisk
+##runPHI requires that both the kernel and initrd are exposed by client through container's env variables KERNEL=/path/to/kernel_image, RAMDISK/path/to/initrd
+#
+for i in $env
+do
+    i=$(echo $i | tr -d \") #leva i " all'inizio e fine
+    if [[ $i = KERNEL=* ]]
+    then
+        kernel=${i#KERNEL=}
+        kernel="$mountpoint"/"$kernel"
+    fi
+    if [[ $i = RAMDISK=* ]]
+    then
+        ramdisk=${i#RAMDISK=}
+        ramdisk="$mountpoint"/"$ramdisk"
+    fi
+     if [[ $i = INMATE=* ]]
+    then
+        inmate=${i#INMATE=}
+        inmate="$mountpoint"/"$inmate"
+    fi
+         if [[ $i = DTB=* ]]
+    then
+        dtb=${i#DTB==}
+        dtb="$mountpoint"/"$dtb"
+    fi
+done
+
+case $hyperv in
+
+  "XEN")
+
+                ##if not provided the guest will be started with a default Kernel and Ramdisk provided by runPHI itself
+                ##both the kernel and initrd has to be stored in $workpath/
+                #
+                if test -z "$kernel"
+                then
+                        kernel="$workpath/buildin/XEN/kernel"
+                echo "kernel='$kernel'" >> $conf
+
+                if test -z "$ramdisk"
+                then
+                        ramdisk="$workpath/buildin/XEN/initrd"
+                fi
+                echo "ramdisk='$ramdisk'" >> $conf
+
+                #boot from hardisk by Default
+                echo "boot='c'" >> $conf
+
+                echo "name=\"$containerid\"" >> $conf
+
+                # p9= Creates a Xen 9pfs connection to share a filesystem from the backend to the frontend.
+                # tag=STRING --> 9pfs tag to identify the filesystem share. The tag is needed on the guest side to mount it.
+                # security_model="none" --> Only "none" is supported today, which means that the files are stored using the same credentials as those they have in the guest (no user ownership squash or remap).
+                # path=STRING --> Filesystem path on the backend to export.
+                echo "p9=[ 'tag=share_dir,security_model=none,path=$mountpoint' ]" >> $conf
+
+        ;;
+
+  "Jailhouse")
+                ##Here if a Kernel and a ramdisk are provided by client a linux-non-root-cell has to be started
+                ##a reference to them is stored in crundir to be used when create is called
+                #
+                if test -n "$kernel"
+                then
+                        echo "$kernel" >> "$crundir"/kernel
+                        ## create a .cpio filesys from rootfs and save it in rootfs/cpio.cpio
+			ls "$mountpoint" | cpio -ov > "$mountpoint"/cpio.cpio
+			cpio=$(cat "$mountpoint"/cpio.cpio)
+			echo "$cpio" >> "$crundir"/cpio
+                fi
+
+                if test -n "$initrd"
+                then
+                        echo "$initrd" >> "$crundir"/initrd
+                fi
+
+              
+    ;;
+
+  *)
+    ##Future implementation bracket
+    ;;
+
+esac
