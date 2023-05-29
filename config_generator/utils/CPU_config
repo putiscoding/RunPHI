@@ -1,0 +1,58 @@
+#!/bin/bash
+
+### CPU Block 
+#	
+#	
+###
+
+conf="$1"
+hyperv="$2"
+crundir="$3"
+
+bundle=$( cat "$crundir"/bundle )
+configfile="$bundle"/config.json
+
+###This region of code could be extended with code to retrieve other specific Docker's flags which set CPU limitations
+###
+cpu_set=$(jq  -c -r '.["linux"]["resources"]["cpu"]["cpus"]' "$configfile") #cpus where allow guest execution set by Docker's flag 'cpuset-cpus'
+
+#Through Docker's flag "cpus=0.0000" user requires an amount cpus usage as percentage 
+#That percentahe will be expressed in form of quota-period ratio (EG: cpus=2.00 means values: quota=20000 and period=10000 --> cpus=2)
+quota=$(jq  -c -r '.["linux"]["resources"]["cpu"]["quota"]' "$configfile")	
+period=$(jq  -c -r '.["linux"]["resources"]["cpu"]["period"]' "$configfile")
+cpus=$(echo "scale=1; $quota / $period" | bc 2> /dev/null) #cpus is a floating point number with only one decimal place
+###
+###
+
+case $hyperv in
+
+  "XEN")
+		## By default it will be assigned 2 vcpus to Guest but if cpus has been set by client the number of Guest's vcpus will be set according to its value
+		## In that case if the value of cpus has a decimal place, cpus will be turned to the next integer (EG:cpus=2.1 --> cpus=3)
+		#
+		if test -n "$cpus"
+		then
+			cpus=$(echo $cpus | awk '{print int($1+0.9)}')  #express cpus as integer (EG:cpus=2.1 --> cpus=3)
+			echo "vcpus = $cpus" >> $conf 
+		else 
+			echo "vcpus = 2" >> $conf 
+		fi 
+			
+		## Moreover, in case it's provided, also a CPUS-pinning will be specified in config 
+		if test -n "$cpu_set"
+		then
+			echo "cpus = $cpu_set" >> $conf 
+		fi  
+	;;
+	
+  "Jailhouse")		
+    ;;
+
+  *)
+    ##Future implementation bracket 
+    ;;
+	
+esac 
+
+## Here (or in a following block) a control about the availability of Hardware shold be implemented 
+

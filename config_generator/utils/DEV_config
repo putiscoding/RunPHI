@@ -1,0 +1,30 @@
+#!/bin/bash
+
+conf="$1"
+hyperv="$2"
+crundir="$3"
+
+bundle=$( cat "$crundir"/bundle )
+configfile="$bundle"/config.json
+
+###This region of code could be extended through code to retrieve other specific Docker's flags which set MEM limitations
+##
+
+
+case $hyperv in
+
+  "XEN")
+		#Redirect virtual serial ports to DEVICEs. Please see the -serial option in the qemu(1) manpage for details of the valid DEVICE option
+		#Pseudo TTY (a new PTY is automatically allocated)
+		echo "serial='pty'" >> $conf 
+		echo "vfb=['vnc=1']" >> $conf
+	;;
+	
+  "Jailhouse")		
+    ;;
+
+  *)
+    ##Future implementation bracket 
+    ;;
+	
+esac 

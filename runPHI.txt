@@ -1,0 +1,192 @@
+#!/bin/bash
+
+workpath=/usr/share/runPHI
+rundir=/run/runPHI
+
+hyperv=""
+guestconsole=""
+cmd=""
+root=""
+bundle=""
+pidfile=""
+containerid=""
+
+##Retrieve flags according to containerd shim (io.containerd.runc.v2)
+#
+while (( "$#" ))
+do
+    if [[ $1 = "--root" ]]
+    then
+        root=$2
+		# echo -e "take root flag=$2\n"
+        shift
+        shift
+        continue
+    fi
+    if [[ $1 = "--bundle" ]]
+    then
+        bundle=$2
+        # echo -e "take bundle flag=$2\n"
+		shift
+        shift
+        continue
+    fi
+    if [[ $1 = "--pid-file" ]]
+    then
+        pidfile=$2
+		# echo -e "take pidfile flag=$2\n"
+        shift
+        shift
+        continue
+    fi
+    if [[ $1 = "--console-socket" ]]
+    then
+        guestconsole="$2"
+		# echo -e "take consolesocket flag=$2\n"
+        shift
+        shift
+        continue
+    fi
+    if [[ $1 = "--no-pivot" ]]
+    then
+		# echo -e "nopivot acquired\n"    
+        shift
+        continue
+    fi
+    if [[ $1 = "--"* ]]
+    then
+		# echo -e "other flag=$1\n"    
+        shift
+        shift
+        continue
+    fi
+    if test -z "$cmd"
+    then
+        cmd=$1
+		# echo -e "cmd called =$1\n"  
+        shift
+        continue
+    fi
+    containerid=$1
+    # echo -e "containerID =$1\n"  
+    break
+done
+
+if ! test "$containerid"
+then
+    echo "no containerid given, exiting"
+    exit 1
+fi
+
+crundir="$rundir"/"$containerid"
+
+if test "$cmd" = "create"
+then
+    rm -rf "$crundir"
+fi
+
+if test ! -d "$crundir"
+then
+    mkdir -p "$crundir"
+	# echo -e "make rundir at $crundir\n"
+fi
+
+
+## OCI Bundle generation 
+#
+if test \( "$bundle" \) -a \( ! -f "$crundir"/bundle \)
+then
+    echo -n "$bundle" > "$crundir"/bundle
+   
+    if  test -f "$bundle"/config.json
+    then
+		#retrieve rootfs from config.json 
+        rootfs="$( jq -r -c  '.["root"]["path"]' "$bundle"/config.json )"
+        if [[ "$rootfs" != /* ]]
+        then
+            rootfs="$bundle"/"$rootfs"
+        fi
+        echo -n "$rootfs" > "$crundir"/rootfs
+    else
+        echo "Cannot determine rootfs"
+        exit 1
+    fi
+
+fi
+  
+##Create a pidfile in the container's rundir 
+# if $pidfile is not empty and $crundir/pidfile has not already created 
+#
+if test \( "$pidfile" \) -a \( ! -f "$crundir"/pidfile \)  
+then
+    echo -n "$pidfile" > "$crundir"/pidfile
+fi
+
+# ##Create console ref into container's run directory 
+# #
+# if test "$guestconsole"
+# then
+    # echo -n "$guestconsole" > "$crundir"/console
+# fi
+
+
+##Check Hypervisor
+#
+hyperv=$($workpath/utils/check_hypervisor)
+
+if test -z "$hyperv" 
+then
+    echo "Cannot determine Hypervisor"
+	exit 1
+fi
+
+
+## Call tools functions according to $cmd set by containerd-shim
+#
+case $cmd in
+
+  "state")
+	echo -e ""$cmd" not implemented yet\n"
+	exit 1
+	# echo -e "Sto per chiamare guest-state\n"
+	# $workpath/guest-state $containerid "$crundir" "$hyperv"
+    ;;
+
+  "start")
+    # echo -e "Sto per chiamare start-guest\n"
+	$workpath/start-guest $containerid "$hyperv"
+    ;;
+	
+  "pause")
+	echo -e ""$cmd" not implemented yet\n"
+	exit 1
+    ;;
+	
+ "resume")
+    echo -e ""$cmd" not implemented yet\n"
+	exit 1
+    ;;
+	
+  "kill")
+	echo -e ""$cmd" not implemented yet\n"
+	exit 1
+	# echo -e "Sto per chiamare delete-guest\n"
+	# $workpath/delete-guest $containerid "$hyperv"
+    ;;
+	
+ "create")
+    # echo -e "Sto per chiamare create-guest\n"
+	$workpath/create-guest $containerid "$crundir" "$hyperv" "$guestconsole"
+    ;;
+	
+ "delete")
+	echo -e ""$cmd" not implemented yet\n"
+	exit 1
+    # rm -rf "$crundir"
+    ;;
+
+  *)
+    echo -e "Command not recognised\n"
+    ;;
+	
+esac
