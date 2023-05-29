@@ -28,7 +28,8 @@ Run the command:
     -device pcie-pci-bridge 
     
    
-    Where LinuxInstallation.img is the image of Ubuntu 18.04. Download and install Jailhouse in it following the official page. Enable the root cell through qemu-x86.cell from Jailhouse source code. Install RunPHi in the root-cell and then create a Docker Image through the following Dckerfile: 
+    Where LinuxInstallation.img is the image of Ubuntu 18.04. Download and install Jailhouse in it following the official page. 
+    Enable the root cell through qemu-x86.cell from Jailhouse source code. Install RunPHi in the root-cell and then create a Docker Image through the following Dckerfile: 
     
      FROM alpine:latest
 
