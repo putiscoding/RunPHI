@@ -9,6 +9,11 @@ Currently the project aims to offer a solution for the seamless deployment of ap
 According to that vision, OS-Virtualization (i.e containers) is used as enabling technology for Cloud through Orchestration System while better isolation, both temporal and spatial, is guaranteed with the help of Partitioning Hypervisor at the edge.
 The same container must be distributed transparently on a high-end server with a fully-fladged hypervisor (i.e Linux) or on a low-end device with a partitioning hypervisor.
 
+Right now RunPHI supports the translation of OCI commands and creates hardware partitions, relying on Jailhouse Hypervisor, starting from Docker's container descriptions.
+
+## Architecture 
+
+
 
 
 
