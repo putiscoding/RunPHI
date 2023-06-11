@@ -19,7 +19,7 @@ It relies on:
 - a layer that manages the OCI compliance by interfacing with the containerd shim.
 - a layer that allows recognition of the hypervisor running upon the hardware.
 - a module that automatically manages the hardware configuration based on container description files and underlying partitioning hypervisor.
-- provides a CLI for partition lifecycle management by abstracting hardware details.
+- provides a CLI for partition lifecycle management by abstracting hardware details and hypervisors' dependencies.
 
 The configuration module is based on:
 - a layer that takes care of domain booting configuration
