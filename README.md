@@ -28,7 +28,7 @@ The configuration module is based on:
 - a layer for CPU management
 - a layer that manages the amount of RAM allocated to the guest
 
-NB: 
+NB: At now, the configuration module is not complete, refer to $RunPHI/config_generator/readme for more information
 
 ## Set-up 
 
@@ -41,16 +41,10 @@ After that you need to:
 - download the RunPHI source code and run $RunPHI/build.sh
 - enable RunPHI as containerd low-level runtime:     mv /usr/sbin/runPHI /usr/bin/runc
 
-## Use Cases 
-
-## General info
-rumPHI comes with a build script that automates the process. For now, being in the testing phase, the user will have to:
-copy to /usr/share/runPHI
-the scripts present in tools together with utils. The built-ins folder will also go there. This is because in a future iteration we will expect a build file with kernels and then we will expect one with cross-compiling. In that case the user will have to export the entire /usr/share/runPHI content to the target.
 
 ## QEMU/KVM apic-demo on x86
 
-This code has been tested through qemu-system_x86 ( quemu vers 7.0.0 ) in a nested setup with Lubuntu 22.04 LTS as HOST and Ubuntu 18.04 LTS as guest
+This code has been tested through qemu-system_x86 (vers 7.0.0) in a nested setup with Lubuntu 22.04 LTS as host and Ubuntu 18.04 LTS as guest.
 
 Run the command: 
 
@@ -70,31 +64,20 @@ Run the command:
     -device hda-duplex 
     -device pcie-pci-bridge 
     
-    +--------------+  	   +-------------+	 +------------+
-|  Root Cell   | 	   |   Kernel 	 |	 |	          |
-|--------------|  	   |-------------|	 |	          |
-| ContainerD   |  	   |   initrd    |	 | Bare Metal |
-|     |        |  	   |-------------|	 |    APP     |
-|   RunPHI     |  	   |  container  |	 |	          |
-|     |        |  	   | rootfs.cpio |	 |	          |
-| create-guest-+------>|             |	 |	          |
-|      \-------+------------------------>|	          | 
-+--------------+-------+-------------+---+------------+
-|                         Jailhouse              	  |
-+-----------------------------------------------------+
-    
    
     Where LinuxInstallation.img is the image of Ubuntu 18.04. Download and install Jailhouse in it following the official page. 
-    Enable the root cell through qemu-x86.cell from Jailhouse source code. Install RunPHi in the root-cell and then create a Docker Image through the following Dckerfile: 
+    Enable the root cell through qemu-x86.cell from Jailhouse source code. 
+    Then install RunPHi in the root-cell through /build.sh.
+    
+    Create a Docker Image through the following Dckerfile: 
     
      FROM alpine:latest
 
-    # Copy the apic
-    -demo.bin file to the container
+    # Copy the apic-demo.bin file to the container
     COPY /path/to/jailhouse/inmates/apic-demo.bin /home/apic-demo.bin
     
     # Set the INMATES environmental variable
     ENV INMATE=/home/apic-demo.bin
     
-    
-    Follow instruction in the code and modify create-guest.sh. Call docker run.
+    Overcame the limitations of the config generator by instrumenting the code as in the comments of the same.
+    Call docker run.
