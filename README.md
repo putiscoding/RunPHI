@@ -1,4 +1,4 @@
-### RunPHI
+# RunPHI
 
 ## General info
 rumPHI comes with a build script that automates the process. For now, being in the testing phase, the user will have to:
