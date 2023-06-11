@@ -37,7 +37,7 @@ For this reason, you must first make sure that the environment in which you work
 
 After that you need to:
 - download the RunPHI source code and run build.sh
-- enable RunPHI as containerd low-level runtime:  mv /usr/sbin/runPHI /usr/bin/runc
+- enable RunPHI as containerd low-level runtime:     mv /usr/sbin/runPHI /usr/bin/runc
 
 ## Use Cases 
 
