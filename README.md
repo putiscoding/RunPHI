@@ -28,6 +28,8 @@ The configuration module is based on:
 - a layer for CPU management
 - a layer that manages the amount of RAM allocated to the guest
 
+NB: 
+
 ## Set-up 
 
 Currently RunPHI only supports Jailhouse Hypervisor. 
