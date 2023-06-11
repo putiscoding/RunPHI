@@ -1,0 +1,11 @@
+Please make sure you have the following installed on your system, they are required by runPHI:
+
+run time:
+qemu >= 7.0.0
+jq >= 1.4
+
+build time:
+bash
+gcc, if cross-compiling CROSS_COMPILE needs to be set
+cpio
+make and other tools needed to build the kernel (flex, bison, bc)
