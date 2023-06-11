@@ -13,6 +13,7 @@ Right now RunPHI supports the translation of OCI commands and creates hardware p
 
 ## Architecture 
 
+/
 +--------------+  	   +-------------+	 +------------+
 |  Root Cell   | 	   |   Kernel 	 |	 |	          |
 |--------------|  	   |-------------|	 |	          |
