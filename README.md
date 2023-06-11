@@ -13,20 +13,6 @@ Right now RunPHI supports the translation of OCI commands and creates hardware p
 
 ## Architecture 
 
-/
-+--------------+  	   +-------------+	 +------------+
-|  Root Cell   | 	   |   Kernel 	 |	 |	          |
-|--------------|  	   |-------------|	 |	          |
-| ContainerD   |  	   |   initrd    |	 | Bare Metal |
-|     |        |  	   |-------------|	 |    APP     |
-|   RunPHI     |  	   |  container  |	 |	          |
-|     |        |  	   | rootfs.cpio |	 |	          |
-| create-guest-+------>|             |	 |	          |
-|      \-------+------------------------>|	          | 
-+--------------+-------+-------------+---+------------+
-|                         Jailhouse              	  |
-+-----------------------------------------------------+
-
 
 
 
@@ -63,6 +49,19 @@ Run the command:
     -device intel-hda,addr=1b.0 
     -device hda-duplex 
     -device pcie-pci-bridge 
+    
+    +--------------+  	   +-------------+	 +------------+
+|  Root Cell   | 	   |   Kernel 	 |	 |	          |
+|--------------|  	   |-------------|	 |	          |
+| ContainerD   |  	   |   initrd    |	 | Bare Metal |
+|     |        |  	   |-------------|	 |    APP     |
+|   RunPHI     |  	   |  container  |	 |	          |
+|     |        |  	   | rootfs.cpio |	 |	          |
+| create-guest-+------>|             |	 |	          |
+|      \-------+------------------------>|	          | 
++--------------+-------+-------------+---+------------+
+|                         Jailhouse              	  |
++-----------------------------------------------------+
     
    
     Where LinuxInstallation.img is the image of Ubuntu 18.04. Download and install Jailhouse in it following the official page. 
