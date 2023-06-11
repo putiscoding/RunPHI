@@ -13,6 +13,18 @@ Right now RunPHI supports the translation of OCI commands and creates hardware p
 
 ## Architecture 
 
++--------------+  	   +-------------+	 +------------+
+|  Root Cell   | 	   |   Kernel 	 |	 |	          |
+|--------------|  	   |-------------|	 |	          |
+| ContainerD   |  	   |   initrd    |	 | Bare Metal |
+|     |        |  	   |-------------|	 |    APP     |
+|   RunPHI     |  	   |  container  |	 |	          |
+|     |        |  	   | rootfs.cpio |	 |	          |
+| create-guest-+------>|             |	 |	          |
+|      \-------+------------------------>|	          | 
++--------------+-------+-------------+---+------------+
+|                         Jailhouse              	  |
++-----------------------------------------------------+
 
 
 
