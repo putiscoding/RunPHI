@@ -1,5 +1,15 @@
 # RunPHI
 
+## Goal and Scope
+
+RunPHI is a young project that arises the need to find a processing environment homogeneous for multi applications domain, supporting mobility of workloads between cloud and edge.
+The objective concerns the transfer of consolidated technologies and de facto standards of the cloud computing in resource-constrained computing environments at the edge.
+Currently the project aims to offer a solution for the seamless deployment of applications in the various computational domains in which it's distributed, according to Industry 4.0 vision.
+
+## Set-up 
+
+## Use Cases 
+
 ## General info
 rumPHI comes with a build script that automates the process. For now, being in the testing phase, the user will have to:
 copy to /usr/share/runPHI
