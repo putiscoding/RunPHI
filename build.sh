@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+# NB: 
+# References are created in /target because cross compilation is expected in the future
+
 oci_cmd="start-guest guest-state create-guest"
 
 mkdir -p target/usr/share/runPHI
