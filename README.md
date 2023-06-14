@@ -39,6 +39,7 @@ For this reason, you must first make sure that the environment in which you work
 
 After that you need to:
 - download the RunPHI source code and run $RunPHI/build.sh
+- Relocate created folders considering real target
 - enable RunPHI as containerd low-level runtime:     mv /usr/sbin/runPHI /usr/bin/runc
 
 
