@@ -1,0 +1,77 @@
+#!/bin/bash
+
+workpath=/usr/share/runPHI/config_generator
+
+containerid="$1"
+crundir="$2"
+hyperv="$3"
+
+##
+# To make possible also to use config-generator by its own, and not only by scripts, 
+# Here a module which checks the regularity of "$crundir" should be implemented
+#
+
+##Create a new config file
+#
+if test "$hyperv" = "XEN"
+then
+        conf="$crundir"/config.cfg
+elif test "$hyperv" = "Jailhouse"
+then
+        conf="$crundir"/"$containerid".c
+else
+        echo -e "Config generator: Hyperv not recognised \n"
+        exit 1
+fi
+
+rm $conf &> /dev/null
+touch $conf
+
+##
+#
+
+$workpath/utils/CPU_config "$conf" "$hyperv" "$crundir"
+
+$workpath/utils/MEM_config "$conf" "$hyperv" "$crundir"
+
+$workpath/utils/BOOT_config "$conf" "$hyperv" "$crundir" "$containerid"
+
+$workpath/utils/DEV_config "$conf" "$hyperv" "$crundir"
+
+$workpath/utils/NET_config "$conf" "$hyperv" "$crundir"
+
+
+#jailhouse needs a .cell file
+#put the config.c by generate_guest_config in $JAILHOUSE/config dir and build 
+# NB: jailhouse has to be installed in ~ 
+if test "$hyperv" = "Jailhouse"
+then
+
+	#check Arch
+        arch=$(lscpu | grep Architecture | awk '{print $2}')
+
+	case $arch in
+
+                "x86_64")
+                        arch="x86"
+                        ;;
+
+                "aarch32")
+                        arch="arm"
+                   	;;
+
+                "aarch64")
+                        arch="arm64"
+                        ;;
+        esac
+
+ 	cd 
+        mv $conf jailhouse/configs/"$arch"/
+ 	cd jailhouse && make > /dev/null
+	conf="jailhouse/configs/"$arch"/"$containerid".cell"
+	
+fi
+
+
+echo "$conf"
+

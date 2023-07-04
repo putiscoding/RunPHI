@@ -1,0 +1,35 @@
+#!/bin/bash
+
+workpath=/usr/share/runPHI
+
+containerid="$1"
+crundir="$2"
+hyperv="$3"
+guestconsole="$4"
+conf=""
+
+### Return /path/to/configuration_file
+## in case you are testing runPHI in qemu-system_x86 comment below section and set 
+
+#conf=$workpath/built-in/jail/apic-demo.cell
+#echo -n "$conf" > "$crundir"/configfile
+
+
+conf=$($workpath/config_generator/generate_guest_config $containerid "$crundir" "$hyperv")
+
+
+#The mount utility is used to adjust rootfs in case the user uses a -v or --mounts flags
+$workpath/utils/mount  $containerid "$crundir" mount "$hyperv"
+$workpath/utils/create $containerid "$crundir" "$conf" "$hyperv"
+
+## guest console is set when -t flag is provided 
+## allocate_console.sh is useful for Hypervisor like XEN or BAO which give the possibility 
+## to start Guest with fully fledged OS
+## Jailhouse gives only the option to start non-root linux cell but the user can connect to it
+## only through ssh
+##
+# if test "$guestconsole"
+#    then
+#        $workpath/utils/allocate_console $containerid "$crundir" "$guestconsole" "$hyperv"
+#fi
+

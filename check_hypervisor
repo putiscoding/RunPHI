@@ -1,0 +1,26 @@
+#!/bin/bash
+
+workpath=/usr/share/runPHI
+temp=$workpath/temp
+hyperv=""
+
+#Is Dom0 running?
+#xl list 0 2> /dev/null | grep r----- > "$temp"
+#hyperv=$(cat $temp)
+hyperv=$(xl list 0 2> /dev/null | grep r-----)
+        if test -n "$hyperv"
+        then
+                echo "XEN"
+        else
+                #Is Root-cell running?
+                jailhouse cell list 2> /dev/null > "$temp"
+                hyperv=$(sed -n 2,2p "$temp"  2> /dev/null | grep running)
+                        if test -n "$hyperv"
+                        then
+                                echo "Jailhouse"
+                        else
+                                #This bracket should be used to integrate the project with new code to identify others RT-Hypervisors
+                                :
+                        fi
+        fi
+rm $temp 2> /dev/null
